@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - "frontend/**"
+      - "vercel.json"
       - ".github/workflows/frontend-deploy.yml"
   workflow_dispatch:
 
@@ -43,24 +44,26 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
       - name: Build Project Artifacts
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
-          # Inject production/staging API URL into build
-          echo "VITE_API_URL=$VITE_API_URL" >> .env.production
-          vercel build --token=$VERCEL_TOKEN
+          # Inject production API URL into build if provided
+          if [ -n "$VITE_API_URL" ]; then
+            echo "VITE_API_URL=$VITE_API_URL" >> .env.production
+          fi
+          vercel build --prod --token=$VERCEL_TOKEN
 
-      - name: Deploy to Vercel (Staging)
+      - name: Deploy to Vercel (Production)
         id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          # Deploys prebuilt artifacts and outputs the live deployment URL
-          DEPLOY_URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN)
+          # Deploys prebuilt artifacts directly to production domain
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
           echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_ENV
           echo "Deployment completed successfully. Live URL: $DEPLOY_URL"
 
