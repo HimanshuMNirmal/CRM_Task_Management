@@ -15,3 +15,4 @@ echo "  Frontend UI:  http://localhost:5173"
 echo "Press Ctrl+C to terminate both servers."
 
 wait
+

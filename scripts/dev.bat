@@ -9,3 +9,4 @@ start "Task Manager - Frontend Vite (Port 5173)" cmd /k "cd frontend && npm run 
 echo Both services launched in separate windows.
 echo   Backend API:  http://localhost:5000
 echo   Frontend UI:  http://localhost:5173
+

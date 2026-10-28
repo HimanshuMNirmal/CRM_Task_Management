@@ -63,3 +63,4 @@ jobs:
           DEPLOY_URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN)
           echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_ENV
           echo "Deployment completed successfully. Live URL: $DEPLOY_URL"
+

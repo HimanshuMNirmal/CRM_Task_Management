@@ -88,3 +88,4 @@ echo "       cd backend && npm run seed"
 echo "  3. Start both services in development mode:"
 echo "       npm run dev"
 echo "========================================================"
+
