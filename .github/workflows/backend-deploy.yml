@@ -38,7 +38,7 @@ jobs:
         run: npm run build
 
   build-and-deploy:
-    name: Build Docker & Deploy to AWS (App Runner / ECR)
+    name: Build Docker & Deploy to AWS EC2
     needs: test
     runs-on: ubuntu-latest
 
@@ -101,17 +101,35 @@ jobs:
 
           echo "Pushed image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      - name: Deploy to AWS App Runner (Ultra Low Usage Architecture)
-        env:
-          APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          if [ -n "$APP_RUNNER_SERVICE_ARN" ]; then
-            echo "Triggering deployment on AWS App Runner service..."
-            aws apprunner start-deployment \
-              --service-arn "$APP_RUNNER_SERVICE_ARN" \
-              --region "$AWS_REGION"
-            echo "AWS App Runner deployment successfully triggered!"
-          else
-            echo "Notice: APP_RUNNER_SERVICE_ARN secret is not set. Docker image was pushed to ECR, but automatic App Runner deployment trigger was skipped."
-          fi
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Logging into Amazon ECR on EC2..."
+            export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+            export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            export AWS_DEFAULT_REGION="${{ secrets.AWS_REGION }}"
+
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+
+            echo "Pulling latest CRM backend image..."
+            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+            echo "Restarting crm-backend container on port 5000..."
+            docker stop crm-backend || true
+            docker rm crm-backend || true
+
+            # Prune unused images to prevent disk space exhaustion
+            docker image prune -f
+
+            # Run new container alongside ResumeForge (:8000)
+            docker run -d \
+              --name crm-backend \
+              --restart unless-stopped \
+              -p 5000:5000 \
+              ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+            echo "CRM backend successfully deployed on port 5000!"
