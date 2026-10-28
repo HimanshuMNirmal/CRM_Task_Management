@@ -24,7 +24,7 @@ export function TasksPage() {
 
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
-  const [view, setView] = useState<View>("list");
+  const [view, setView] = useState<View>("board");
   const [creating, setCreating] = useState(false);
 
   // Wait until the user stops typing before searching.
@@ -57,7 +57,7 @@ export function TasksPage() {
         actions={
           <>
             <div className="inline-flex overflow-hidden rounded-md border border-slate-300">
-              {(["list", "board"] as const).map((v) => (
+              {(["board", "list"] as const).map((v) => (
                 <button
                   key={v}
                   className={`px-3 py-2 text-sm font-medium capitalize ${view === v ? "bg-indigo-600 text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
