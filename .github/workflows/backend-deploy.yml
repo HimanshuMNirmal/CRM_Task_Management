@@ -102,13 +102,16 @@ jobs:
           echo "Pushed image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Deploy to AWS App Runner (Ultra Low Usage Architecture)
-        if: ${{ secrets.APP_RUNNER_SERVICE_ARN != '' }}
         env:
           APP_RUNNER_SERVICE_ARN: ${{ secrets.APP_RUNNER_SERVICE_ARN }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          echo "Triggering deployment on AWS App Runner service..."
-          aws apprunner start-deployment \
-            --service-arn "$APP_RUNNER_SERVICE_ARN" \
-            --region "$AWS_REGION"
-          echo "AWS App Runner deployment successfully triggered!"
+          if [ -n "$APP_RUNNER_SERVICE_ARN" ]; then
+            echo "Triggering deployment on AWS App Runner service..."
+            aws apprunner start-deployment \
+              --service-arn "$APP_RUNNER_SERVICE_ARN" \
+              --region "$AWS_REGION"
+            echo "AWS App Runner deployment successfully triggered!"
+          else
+            echo "Notice: APP_RUNNER_SERVICE_ARN secret is not set. Docker image was pushed to ECR, but automatic App Runner deployment trigger was skipped."
+          fi
