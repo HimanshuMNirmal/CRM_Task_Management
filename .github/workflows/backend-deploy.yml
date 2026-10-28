@@ -76,6 +76,38 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Ensure Port 5000 is open in EC2 Security Group
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          if [ -n "$EC2_HOST" ]; then
+            echo "Checking Security Group for EC2 Host: $EC2_HOST..."
+            INSTANCE_ID=$(aws ec2 describe-instances \
+              --filters "Name=ip-address,Values=$EC2_HOST" \
+              --region "$AWS_REGION" \
+              --query "Reservations[0].Instances[0].InstanceId" \
+              --output text 2>/dev/null || echo "")
+
+            if [ "$INSTANCE_ID" != "None" ] && [ -n "$INSTANCE_ID" ]; then
+              SG_ID=$(aws ec2 describe-instances \
+                --instance-ids "$INSTANCE_ID" \
+                --region "$AWS_REGION" \
+                --query "Reservations[0].Instances[0].SecurityGroups[0].GroupId" \
+                --output text 2>/dev/null || echo "")
+
+              if [ "$SG_ID" != "None" ] && [ -n "$SG_ID" ]; then
+                echo "Authorizing port 5000 on Security Group $SG_ID..."
+                aws ec2 authorize-security-group-ingress \
+                  --group-id "$SG_ID" \
+                  --protocol tcp \
+                  --port 5000 \
+                  --cidr 0.0.0.0/0 \
+                  --region "$AWS_REGION" 2>/dev/null || echo "Port 5000 rule already configured in Security Group."
+              fi
+            fi
+          fi
+
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
