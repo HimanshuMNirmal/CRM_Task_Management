@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - staging
+      - main
     paths:
       - "backend/**"
       - ".github/workflows/backend-deploy.yml"
@@ -26,7 +27,7 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
-          cache-dependency-path: backend/package.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
