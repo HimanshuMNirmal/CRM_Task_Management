@@ -28,11 +28,6 @@ export function LoginPage() {
     }
   }
 
-  function fillAdminCredentials() {
-    setEmail("admin@crm.com");
-    setPassword("admin123");
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
@@ -50,7 +45,7 @@ export function LoginPage() {
               className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@crm.com"
+              placeholder="you@example.com"
               required
               autoFocus
             />
@@ -72,20 +67,6 @@ export function LoginPage() {
           <button type="submit" className="btn-primary w-full" disabled={submitting}>
             {submitting ? "Signing in..." : "Sign in"}
           </button>
-
-          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-600">
-            <p className="font-medium text-slate-700">Seeded Admin Account</p>
-            <p className="mt-1 font-mono text-slate-800">
-              admin@crm.com &bull; admin123
-            </p>
-            <button
-              type="button"
-              onClick={fillAdminCredentials}
-              className="mt-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
-            >
-              Click to Auto-fill
-            </button>
-          </div>
         </form>
       </div>
     </div>
