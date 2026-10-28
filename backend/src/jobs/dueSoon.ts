@@ -1,5 +1,5 @@
-import { NotificationModel } from "../models/Notification";
 import { TaskModel } from "../models/Task";
+import { createNotifications } from "../services/notification.service";
 
 const HOUR = 60 * 60 * 1000;
 
@@ -17,11 +17,11 @@ export async function notifyDueSoonTasks(): Promise<number> {
 
   if (tasks.length === 0) return 0;
 
-  await NotificationModel.insertMany(
+  await createNotifications(
     tasks.map((task) => ({
       user: task.assignee,
       task: task._id,
-      type: "DUE_SOON",
+      type: "DUE_SOON" as const,
       message: `"${task.title}" is due within 24 hours`,
     })),
   );

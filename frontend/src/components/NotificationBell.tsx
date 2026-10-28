@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { notificationsApi } from "../api/endpoints";
+import { connectSocket } from "../api/socket";
 import type { AppNotification } from "../api/types";
 import { formatDateTime } from "../utils/format";
 
-const POLL_INTERVAL_MS = 30_000;
+const MAX_ITEMS = 30; // same limit as the API list
 
-/** Bell icon in the header: unread count + dropdown list. Refreshes every 30 seconds. */
+/** Bell icon in the header: unread count + dropdown list. The server pushes new notifications over Socket.IO. */
 export function NotificationBell() {
   const navigate = useNavigate();
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -20,14 +21,24 @@ export function NotificationBell() {
       setItems(result.items);
       setUnreadCount(result.unreadCount);
     } catch {
-      // Ignore: the next poll will try again.
+      // Ignore: we refresh again on the next reconnect or when the dropdown opens.
     }
   }, []);
 
   useEffect(() => {
     void refresh();
-    const timer = setInterval(() => void refresh(), POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
+    const socket = connectSocket();
+    socket.on("notification:new", (n: AppNotification) => {
+      setItems((prev) => [n, ...prev].slice(0, MAX_ITEMS));
+      setUnreadCount((c) => c + 1);
+    });
+    // Read state changed in another tab.
+    socket.on("notifications:updated", () => void refresh());
+    // Catch up on anything sent while we were disconnected.
+    socket.io.on("reconnect", () => void refresh());
+    return () => {
+      socket.disconnect();
+    };
   }, [refresh]);
 
   // Close the dropdown when clicking outside of it.

@@ -1,5 +1,5 @@
 // A tiny wrapper around fetch(): adds the JWT, sends/receives JSON, and turns errors into ApiError.
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+export const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
 const TOKEN_KEY = "task_manager_token";
 
 export const tokenStorage = {

@@ -55,6 +55,8 @@ jobs:
           if [ -n "$VITE_API_URL" ]; then
             echo "VITE_API_URL=$VITE_API_URL" >> .env.production
           fi
+          # Vercel's rewrite proxy can't upgrade to WebSocket, so Socket.IO uses long-polling
+          echo "VITE_SOCKET_POLLING_ONLY=true" >> .env.production
           vercel build --prod --token=$VERCEL_TOKEN
 
       - name: Deploy to Vercel (Production)
