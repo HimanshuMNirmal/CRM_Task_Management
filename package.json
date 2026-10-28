@@ -1,0 +1,29 @@
+{
+  "name": "crm-task-management",
+  "version": "1.0.0",
+  "description": "Role-Based CRM & Task Management System",
+  "private": true,
+  "scripts": {
+    "setup": "node scripts/run-os.js setup",
+    "dev": "node scripts/run-os.js dev",
+    "start": "node scripts/run-os.js start",
+    "setup:win": "cmd /c scripts\\setup.bat",
+    "setup:linux": "bash scripts/setup.sh",
+    "dev:win": "cmd /c scripts\\dev.bat",
+    "dev:linux": "bash scripts/dev.sh",
+    "test": "npm --prefix backend test",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:backend && npm run build:frontend"
+  },
+  "keywords": [
+    "task-management",
+    "crm",
+    "react",
+    "express",
+    "mongodb",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC"
+}
