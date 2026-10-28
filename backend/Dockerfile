@@ -39,6 +39,9 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy compiled JavaScript output from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Copy environment file generated from CI/CD secrets
+COPY .env* ./
+
 # Create uploads directory and set permissions for non-root 'node' user
 RUN mkdir -p uploads && chown -R node:node /app
 

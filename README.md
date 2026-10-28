@@ -148,17 +148,22 @@ To enable automated CI/CD for both Vercel and AWS, configure the following secre
 > **IAM Permissions Needed for AWS Deployment**:
 > Your IAM deployment user needs permissions for Amazon ECR (`ecr:GetAuthorizationToken`, `ecr:BatchCheckLayerAvailability`, `ecr:GetDownloadUrlForLayer`, `ecr:PutImage`, `ecr:InitiateLayerUpload`, `ecr:UploadLayerPart`, `ecr:CompleteLayerUpload`) and AWS App Runner (`apprunner:StartDeployment`, `apprunner:DescribeService`).
 
-### C. Backend Application Environment Variables
-*(Configure these directly in the **AWS App Runner Configuration > Environment variables** or AWS Parameter Store)*
+### C. Backend Application Secrets (Managed directly in GitHub Secrets!)
 
-| Variable Name | Required Value / Description | Example |
+You **do not** need to manually enter environment variables in AWS. The GitHub Actions CI/CD pipeline takes these variables directly from **GitHub Secrets**, writes `backend/.env` during the build, and packages it into the Docker container. 
+
+Simply add these directly as GitHub Secrets:
+
+| Secret Name | Required Value / Description | Example |
 |---|---|---|
-| `PORT` | Container listen port | `5000` |
 | `MONGODB_URI` | MongoDB Atlas Connection String | `mongodb+srv://<user>:<password>@cluster0.e0ouwuu.mongodb.net/task_manager?retryWrites=true&w=majority` |
 | `JWT_SECRET` | Secure random string (minimum 16 chars) | E.g. generate via `openssl rand -hex 32` |
-| `JWT_EXPIRES_IN` | Token expiration duration | `8h` |
-| `CLIENT_ORIGIN` | Allowed CORS origins (Vercel URL) | `https://your-crm-frontend.vercel.app` (supports comma-separated list) |
-| `UPLOAD_DIR` | Directory for file attachments | `uploads` |
+| `CLIENT_ORIGIN` | Allowed CORS origins (Your Vercel URL) | `https://crm-task-staging.vercel.app` (supports comma-separated list) |
+| `PORT` *(Optional)* | Container port (Defaults to `5000`) | `5000` |
+| `JWT_EXPIRES_IN` *(Optional)* | Token validity (Defaults to `8h`) | `8h` |
+| `UPLOAD_DIR` *(Optional)* | Attachments folder (Defaults to `uploads`) | `uploads` |
+
+Whenever you update any of these secrets in GitHub and trigger a deploy on `staging`, the pipeline automatically updates the application!
 
 ---
 
