@@ -14,3 +14,4 @@ userRoutes.use(requireRole("ADMIN"));
 userRoutes.get("/", controller.list);
 userRoutes.post("/", controller.create);
 userRoutes.patch("/:id", controller.update);
+userRoutes.post("/:id/reassign-tasks", controller.reassignTasks); // e.g. before deactivating someone

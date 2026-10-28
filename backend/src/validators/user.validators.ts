@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ROLES } from "../constants";
+import { objectId } from "./common";
 
 const email = z.string().trim().toLowerCase().pipe(z.email("Enter a valid email"));
 
@@ -22,6 +23,10 @@ export const updateUserSchema = z
 
 export const listUsersQuerySchema = z.object({
   role: z.enum(ROLES).optional(),
+});
+
+export const reassignTasksSchema = z.object({
+  assigneeId: objectId,
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;

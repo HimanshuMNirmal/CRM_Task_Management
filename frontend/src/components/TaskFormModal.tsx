@@ -37,6 +37,8 @@ export function TaskFormModal({ task, defaultProjectId, onClose, onSaved }: Task
   // The team of the selected project decides who can be assigned.
   const teamId = task?.team ?? options.data?.projects.find((p) => p._id === projectId)?.team._id;
   const assigneeChoices = (options.data?.assignees ?? []).filter((u) => u.team === teamId);
+  // The current assignee may be deactivated or out of the team. Keep them selectable so other edits can be saved.
+  const currentAssigneeGone = task !== undefined && !assigneeChoices.some((u) => u._id === task.assignee._id);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -96,6 +98,7 @@ export function TaskFormModal({ task, defaultProjectId, onClose, onSaved }: Task
             <label className="label" htmlFor="t-assignee">Assignee</label>
             <select id="t-assignee" className="input" value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} required disabled={!teamId}>
               <option value="">{teamId ? "Select an employee" : "Select a project first"}</option>
+              {currentAssigneeGone && <option value={task.assignee._id}>{task.assignee.name} (no longer assignable)</option>}
               {assigneeChoices.map((u) => (
                 <option key={u._id} value={u._id}>{u.name}</option>
               ))}

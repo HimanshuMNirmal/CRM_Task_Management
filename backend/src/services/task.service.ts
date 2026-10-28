@@ -24,7 +24,7 @@ import type {
   UpdateTaskInput,
 } from "../validators/task.validators";
 import { logActivity } from "./activity.service";
-import { notifyUsers } from "./notification.service";
+import { createNotifications, notifyUsers } from "./notification.service";
 
 // ---------------------------------------------------------------------------
 // Shapes
@@ -248,6 +248,43 @@ export async function updateTask(user: AuthUser, id: string, input: UpdateTaskIn
   }
 
   return getTask(user, id);
+}
+
+/**
+ * Admin: hands someone's unfinished tasks to another employee (e.g. before deactivating them).
+ * Only tasks in the new assignee's team can move; the rest are counted as `skipped` and stay put.
+ */
+export async function reassignOpenTasks(user: AuthUser, fromUserId: string, toUserId: string) {
+  if (fromUserId === toUserId) throw AppError.badRequest("Pick a different employee");
+  const previous = await UserModel.findById(toObjectId(fromUserId, "user id")).select("name");
+  if (!previous) throw AppError.notFound("User not found");
+
+  const target = await UserModel.findById(toObjectId(toUserId, "assignee id"));
+  const teamId = target?.team?.toString();
+  if (!target || !teamId || !isValidAssignee({ role: target.role, isActive: target.isActive, teamId }, teamId)) {
+    throw AppError.badRequest("The new assignee must be an active employee of a team");
+  }
+
+  const open: QueryFilter<ITask> = { assignee: previous._id, status: { $ne: "DONE" } };
+  const [tasks, skipped] = await Promise.all([
+    TaskModel.find({ ...open, team: target.team }).select("title"),
+    TaskModel.countDocuments({ ...open, team: { $ne: target.team } }),
+  ]);
+  if (tasks.length === 0) return { reassigned: 0, skipped };
+
+  await TaskModel.updateMany({ _id: { $in: tasks.map((t) => t._id) } }, { assignee: target._id });
+  await Promise.all(
+    tasks.map((t) => logActivity(t._id, user.id, "TASK_ASSIGNED", `Reassigned the task from ${previous.name} to ${target.name}`)),
+  );
+  await createNotifications(
+    tasks.map((t) => ({
+      user: target._id,
+      task: t._id,
+      type: "TASK_ASSIGNED" as const,
+      message: `You were assigned a task: "${t.title}"`,
+    })),
+  );
+  return { reassigned: tasks.length, skipped };
 }
 
 export async function changeStatus(user: AuthUser, id: string, input: ChangeStatusInput) {

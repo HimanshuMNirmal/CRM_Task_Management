@@ -30,6 +30,9 @@ export const usersApi = {
   create: (data: { name: string; email: string; password: string; role: Role }) => http.post<User>("/users", data),
   update: (id: string, data: { name?: string; role?: Role; isActive?: boolean; password?: string }) =>
     http.patch<User>(`/users/${id}`, data),
+  /** Moves the user's unfinished tasks to another employee. Tasks outside that employee's team are skipped. */
+  reassignTasks: (id: string, assigneeId: string) =>
+    http.post<{ reassigned: number; skipped: number }>(`/users/${id}/reassign-tasks`, { assigneeId }),
 };
 
 export const teamsApi = {

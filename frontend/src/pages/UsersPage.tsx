@@ -9,27 +9,39 @@ import { useAuth } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
 
 /** Create a user (when `user` is empty) or edit one. */
-function UserFormModal({ user, onClose, onSaved }: { user?: UserListItem; onClose: () => void; onSaved: () => void }) {
+function UserFormModal({ user, onClose, onSaved }: { user?: UserListItem; onClose: () => void; onSaved: (notice?: string) => void }) {
   const isEdit = user !== undefined;
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>(user?.role ?? "EMPLOYEE");
   const [isActive, setIsActive] = useState(user?.isActive ?? true);
+  const [reassignTo, setReassignTo] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Deactivating an employee: offer to hand their open tasks to a teammate.
+  const deactivatingEmployee = user?.isActive === true && !isActive && user.role === "EMPLOYEE";
+  const assignable = useFetch(() => (user?.role === "EMPLOYEE" ? usersApi.assignable() : Promise.resolve([])), []);
+  const reassignChoices = (assignable.data ?? []).filter((u) => u._id !== user?._id && (!user?.team || u.team === user.team._id));
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     try {
+      let notice: string | undefined;
       if (user) {
+        if (deactivatingEmployee && reassignTo) {
+          const { reassigned, skipped } = await usersApi.reassignTasks(user._id, reassignTo);
+          notice = `Reassigned ${reassigned} open task(s) from ${user.name}.`;
+          if (skipped > 0) notice += ` ${skipped} task(s) in other teams are still assigned to them.`;
+        }
         await usersApi.update(user._id, { name, role, isActive, ...(password ? { password } : {}) });
       } else {
         await usersApi.create({ name, email, password, role });
       }
-      onSaved();
+      onSaved(notice);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save the user");
       setSaving(false);
@@ -67,6 +79,17 @@ function UserFormModal({ user, onClose, onSaved }: { user?: UserListItem; onClos
             Account is active (untick to deactivate)
           </label>
         )}
+        {deactivatingEmployee && (
+          <div>
+            <label className="label" htmlFor="u-reassign">Reassign their open tasks to</label>
+            <select id="u-reassign" className="input" value={reassignTo} onChange={(e) => setReassignTo(e.target.value)}>
+              <option value="">Leave them assigned to {user.name}</option>
+              {reassignChoices.map((u) => (
+                <option key={u._id} value={u._id}>{u.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
           <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Saving..." : "Save"}</button>
@@ -80,12 +103,14 @@ export function UsersPage() {
   const { user: me } = useAuth();
   const users = useFetch(() => usersApi.list(), []);
   const [editing, setEditing] = useState<UserListItem | "new" | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   return (
     <>
       <PageHeader title="Users" subtitle="Create users, change roles and deactivate accounts" actions={<button className="btn-primary" onClick={() => setEditing("new")}>+ New user</button>} />
       {users.loading && !users.data && <Spinner />}
       <ErrorMessage message={users.error} />
+      {notice && <div className="mb-4 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-800">{notice}</div>}
 
       {users.data && (
         <div className="card overflow-x-auto">
@@ -122,7 +147,8 @@ export function UsersPage() {
         <UserFormModal
           user={editing === "new" ? undefined : editing}
           onClose={() => setEditing(null)}
-          onSaved={() => {
+          onSaved={(message) => {
+            setNotice(message ?? null);
             setEditing(null);
             users.reload();
           }}
