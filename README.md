@@ -54,24 +54,21 @@ If you prefer running platform-specific commands directly:
 | **Windows** | `npm run setup:win` *(or `scripts\setup.bat`)* | `npm run dev:win` *(or `scripts\dev.bat`)* |
 | **Linux / macOS** | `npm run setup:linux` *(or `bash scripts/setup.sh`)* | `npm run dev:linux` *(or `bash scripts/dev.sh`)* |
 
-### Seed Demo Data (Optional)
-To populate demo users, teams, projects, and tasks:
+### Seed Initial Admin User
+To populate the initial admin account:
 ```bash
 cd backend
 npm run seed
 ```
 
-#### Seed Credentials
-All accounts use the password: **`Password@123`**
+#### Admin Credentials
+The seed script creates a clean database with a single initial Admin account:
 
-| Role     | Email                    | Team       |
-| -------- | ------------------------ | ---------- |
-| Admin    | `admin@example.com`      | -          |
-| Manager  | `manager1@example.com`   | Team Alpha |
-| Manager  | `manager2@example.com`   | Team Beta  |
-| Employee | `employee1@example.com`  | Team Alpha |
-| Employee | `employee2@example.com`  | Team Alpha |
-| Employee | `employee3@example.com`  | Team Beta  |
+| Role | Email | Password |
+| --- | --- | --- |
+| **Admin** | `admin@crm.com` | `admin123` |
+
+Log in with this admin account to create teams, assign managers, add employees, and configure projects.
 
 ---
 

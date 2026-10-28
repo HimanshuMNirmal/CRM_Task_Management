@@ -73,7 +73,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Password@123\"\n}"
+              "raw": "{\n  \"email\": \"admin@crm.com\",\n  \"password\": \"admin123\"\n}"
             },
             "auth": {
               "type": "noauth"

@@ -28,25 +28,64 @@ export function LoginPage() {
     }
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <h1 className="mb-6 text-center text-3xl font-bold text-indigo-600">TaskManager</h1>
+  function fillAdminCredentials() {
+    setEmail("admin@crm.com");
+    setPassword("admin123");
+  }
 
-        <form onSubmit={handleSubmit} className="card space-y-4 p-6">
-          <h2 className="text-lg font-semibold">Sign in</h2>
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
+      <div className="w-full max-w-md">
+        <h1 className="mb-6 text-center text-3xl font-bold text-indigo-600">TaskManager CRM</h1>
+
+        <form onSubmit={handleSubmit} className="card space-y-4 p-6 shadow-md">
+          <h2 className="text-lg font-semibold text-slate-800">Sign in</h2>
           <ErrorMessage message={error} />
+
           <div>
             <label className="label" htmlFor="email">Email</label>
-            <input id="email" type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
+            <input
+              id="email"
+              type="email"
+              className="input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@crm.com"
+              required
+              autoFocus
+            />
           </div>
+
           <div>
             <label className="label" htmlFor="password">Password</label>
-            <input id="password" type="password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              id="password"
+              type="password"
+              className="input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
           </div>
+
           <button type="submit" className="btn-primary w-full" disabled={submitting}>
             {submitting ? "Signing in..." : "Sign in"}
           </button>
+
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-600">
+            <p className="font-medium text-slate-700">Seeded Admin Account</p>
+            <p className="mt-1 font-mono text-slate-800">
+              admin@crm.com &bull; admin123
+            </p>
+            <button
+              type="button"
+              onClick={fillAdminCredentials}
+              className="mt-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
+            >
+              Click to Auto-fill
+            </button>
+          </div>
         </form>
       </div>
     </div>
