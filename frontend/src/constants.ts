@@ -46,9 +46,9 @@ export const PROJECT_STATUS_LABELS: Record<ProjectStatusValue, string> = {
 };
 
 /**
- * Same rule as the API: sending a task back out of "In Review" needs a reason.
+ * Same rule as the API: sending a task back out of "In Review" or reopening a "Done" task needs a reason.
  * (Only used to decide whether to ask for a reason. The API still enforces it.)
  */
 export function requiresReason(from: TaskStatus, to: TaskStatus): boolean {
-  return from === "IN_REVIEW" && to !== "DONE";
+  return (from === "IN_REVIEW" && to !== "DONE") || (from === "DONE" && to !== "DONE");
 }

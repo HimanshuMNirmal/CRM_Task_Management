@@ -101,6 +101,12 @@ describe("status workflow - manager and admin", () => {
     expect(checkStatusChange(managerA, task("IN_REVIEW"), "IN_PROGRESS", "   ")).toMatchObject({ ok: false, statusCode: 400 });
     expect(checkStatusChange(managerA, task("IN_REVIEW"), "IN_PROGRESS", "Copy needs a rewrite").ok).toBe(true);
   });
+  it("reopening a task from Done needs a reason", () => {
+    expect(checkStatusChange(managerA, task("DONE"), "IN_PROGRESS")).toMatchObject({ ok: false, statusCode: 400 });
+    expect(checkStatusChange(managerA, task("DONE"), "IN_REVIEW")).toMatchObject({ ok: false, statusCode: 400 });
+    expect(checkStatusChange(managerA, task("DONE"), "TODO")).toMatchObject({ ok: false, statusCode: 400 });
+    expect(checkStatusChange(managerA, task("DONE"), "IN_PROGRESS", "Reopening due to client feedback").ok).toBe(true);
+  });
   it("admin can set any status", () => {
     expect(checkStatusChange(admin, task("TODO"), "DONE").ok).toBe(true);
   });

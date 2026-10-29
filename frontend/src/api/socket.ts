@@ -10,7 +10,7 @@ const POLLING_ONLY = import.meta.env.VITE_SOCKET_POLLING_ONLY === "true";
 export function connectSocket(): Socket {
   return io(BASE_URL || undefined, {
     // A function, so every reconnect sends the token that is saved right now.
-    auth: (cb) => cb({ token: tokenStorage.get() }),
+    auth: (cb: (data: Record<string, unknown>) => void) => cb({ token: tokenStorage.get() }),
     transports: POLLING_ONLY ? ["polling"] : undefined,
   });
 }

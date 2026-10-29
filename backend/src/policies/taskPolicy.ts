@@ -88,9 +88,9 @@ const EMPLOYEE_NEXT_STEP: Partial<Record<TaskStatus, TaskStatus>> = {
   IN_PROGRESS: "IN_REVIEW",
 };
 
-/** A reason is required when review is rejected, i.e. IN_REVIEW -> anything except DONE. */
+/** A reason is required when a review is rejected (IN_REVIEW -> anything except DONE) or when reopening a completed task (DONE -> anything except DONE). */
 export function requiresReason(from: TaskStatus, to: TaskStatus): boolean {
-  return from === "IN_REVIEW" && to !== "DONE";
+  return (from === "IN_REVIEW" && to !== "DONE") || (from === "DONE" && to !== "DONE");
 }
 
 export function checkStatusChange(
@@ -122,7 +122,8 @@ export function checkStatusChange(
     return { ok: false, statusCode: 403, message: "This task belongs to another team" };
   }
   if (requiresReason(task.status, to) && !reason?.trim()) {
-    return { ok: false, statusCode: 400, message: "A reason is required when moving a task back from In Review" };
+    const action = task.status === "DONE" ? "reopening a completed task" : "moving a task back from In Review";
+    return { ok: false, statusCode: 400, message: `A reason is required when ${action}` };
   }
   return { ok: true };
 }

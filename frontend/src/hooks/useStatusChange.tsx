@@ -55,7 +55,11 @@ export function useStatusChange(onChanged: () => void) {
             }}
             className="space-y-4"
           >
-            <p className="text-sm text-slate-600">Please explain why this task is being sent back. The assignee will see this reason.</p>
+            <p className="text-sm text-slate-600">
+              {pending.task.status === "DONE"
+                ? "Please explain why this completed task is being reopened. The assignee will see this reason."
+                : "Please explain why this task is being sent back. The assignee will see this reason."}
+            </p>
             <textarea className="input" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} required autoFocus />
             <div className="flex justify-end gap-2">
               <button type="button" className="btn-secondary" onClick={() => setPending(null)}>
