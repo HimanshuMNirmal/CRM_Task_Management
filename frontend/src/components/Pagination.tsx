@@ -7,7 +7,7 @@ interface PaginationProps {
 
 export function Pagination({ page, pages, total, onChange }: PaginationProps) {
   return (
-    <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
       <span>{total} task{total === 1 ? "" : "s"}</span>
       <div className="flex items-center gap-2">
         <button className="btn-secondary" disabled={page <= 1} onClick={() => onChange(page - 1)}>

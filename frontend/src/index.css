@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 /* Small set of reusable building blocks so pages stay readable. */
 @layer components {
   .card {

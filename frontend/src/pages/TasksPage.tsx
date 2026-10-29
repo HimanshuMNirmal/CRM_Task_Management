@@ -91,7 +91,7 @@ export function TasksPage() {
       {tasks.loading && !tasks.data && <Spinner />}
 
       {tasks.data && view === "list" && (
-        <div className="card">
+        <div className="card overflow-hidden">
           <TaskTable tasks={tasks.data.items} />
           <Pagination page={tasks.data.page} pages={tasks.data.pages} total={tasks.data.total} onChange={setPage} />
         </div>
