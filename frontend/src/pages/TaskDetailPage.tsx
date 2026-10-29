@@ -146,7 +146,7 @@ export function TaskDetailPage() {
           <ul className="space-y-1 text-sm">
             {t.attachments.map((file) => (
               <li key={file.fileName}>
-                <a className="text-indigo-700 hover:underline" href={apiUrl(file.url)} target="_blank" rel="noreferrer">{file.originalName}</a>
+                <a className="text-indigo-700 hover:underline" href={apiUrl(file.url)} download={file.originalName} target="_blank" rel="noreferrer">{file.originalName}</a>
                 <span className="ml-2 text-xs text-slate-500">{formatFileSize(file.size)}</span>
               </li>
             ))}

@@ -157,11 +157,15 @@ jobs:
             # Prune unused images to prevent disk space exhaustion
             docker image prune -f
 
-            # Run new container alongside ResumeForge (:8000)
+            # Ensure persistent uploads directory exists on host
+            mkdir -p /home/ubuntu/crm-uploads && chmod 777 /home/ubuntu/crm-uploads
+
+            # Run new container alongside ResumeForge (:8000) with persistent volume for uploads
             docker run -d \
               --name crm-backend \
               --restart unless-stopped \
               -p 5000:5000 \
+              -v /home/ubuntu/crm-uploads:/app/uploads \
               ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
 
             echo "CRM backend successfully deployed on port 5000!"
